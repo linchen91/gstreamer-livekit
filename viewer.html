@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LiveKit Viewer</title>
+  <script src="https://unpkg.com/livekit-client@latest/dist/livekit-client.umd.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    video { width: 200%; max-width: 1600px; background: #000; }
+    input, button { padding: 10px; margin: 5px; }
+    #video-container { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>LiveKit Viewer</h1>
+  <input id="room" placeholder="Room name" value="myroom">
+  <input id="name" placeholder="Your name" value="viewer">
+  <button onclick="join()">Join</button>
+  <button onclick="leave()">Leave</button>
+  <div id="video-container"></div>
+
+  <script>
+    let room;
+    
+    async function join() {
+      const roomName = document.getElementById('room').value;
+      const userName = document.getElementById('name').value;
+      
+      // Get token from server
+      const resp = await fetch('http://127.0.0.1:7880/getToken', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({room: roomName, identity: userName})
+      });
+      const {token} = await resp.json();
+      
+      room = new LiveKit.Room();
+      await room.connect('ws://127.0.0.1:7880', token);
+      
+      room.on('trackSubscribed', (track, publication, participant) => {
+        document.getElementById('video-container').appendChild(track.attach());
+      });
+    }
+    
+    function leave() {
+      room.disconnect();
+    }
+  </script>
+</body>
+</html>
