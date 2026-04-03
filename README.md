@@ -33,7 +33,7 @@ The server runs at `http://127.0.0.1:3000` and provides JWT tokens for authentic
 
 **From webcam:**
 ```bash
-./stream-cam.sh
+./stream-publisher.sh
 ```
 
 **From MP4 file (with audio):**
@@ -53,6 +53,7 @@ Open `http://127.0.0.1:3000` in a browser, or use `viewer.html` directly connect
 | `stream.sh` | Subscribe to a LiveKit room using GStreamer |
 | `stream-cam.sh` | Stream webcam to LiveKit room |
 | `stream-av.sh` | Stream MP4 file (video + audio) to LiveKit room |
+| `stream-publisher.sh` | Stream webcam + audio to LiveKit using gstreamer-publisher (requires gstreamer-publisher binary) |
 | `viewer.html` | Browser-based viewer (standalone) |
 
 ## Architecture
@@ -65,6 +66,20 @@ Open `http://127.0.0.1:3000` in a browser, or use `viewer.html` directly connect
 - **Producer:** GStreamer with `livekitwebrtcsink` element pushes audio/video to LiveKit
 - **SFU:** LiveKit server handles routing to subscribers
 - **Subscriber:** Browser or GStreamer with `livekitwebrtcsrc` consumes the stream
+
+## Multiple Viewers
+
+LiveKit SFU supports multiple concurrent viewers. You can open multiple browser tabs or windows pointing to `http://127.0.0.1:3000` to watch the same stream simultaneously. Each viewer receives its own WebRTC connection via the SFU.
+
+To test with multiple viewers:
+1. Start the publisher (e.g., `./stream-cam.sh` or `./stream-publisher.sh`)
+2. Open multiple browser tabs at `http://127.0.0.1:3000`
+3. Enter the same room name (e.g., `myroom`) and different identities for each viewer
+
+The SFU automatically handles:
+- Distributing the stream to all connected viewers
+- Managing individual WebRTC connections
+- Handling viewer join/leave events
 
 ## Configuration
 
