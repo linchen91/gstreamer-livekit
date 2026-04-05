@@ -1,0 +1,37 @@
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    environment:
+      LIVEKIT_KEYS: "devkey: secretsecretsecretsecretsecretsecretsecret"
+    command: --dev
+    networks:
+      - livekit-net
+
+  gstreamer-livekit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      LIVEKIT_URL: ws://livekit:7880
+      BROWSER_WS_URL: ws://localhost:7880
+    devices:
+      - /dev/video0:/dev/video0
+      - /dev/snd:/dev/snd
+    entrypoint: /bin/sh
+    command: >
+      -c 'node server.js & gstreamer-publisher --url "ws://livekit:7880" --token "eyJhbGciOiJIUzI1NiJ9.eyJuYW1lIjoiZ3N0LXByb2R1Y2VyIiwidmlkZW8iOnsicm9vbUpvaW4iOnRydWUsInJvb20iOiJteXJvb20iLCJjYW5QdWJsaXNoIjp0cnVlLCJjYW5TdWJzY3JpYmUiOnRydWV9LCJpc3MiOiJkZXZrZXkiLCJleHAiOjE4MDcwNDQ1NzUsIm5iZiI6MCwic3ViIjoiZ3N0LXByb2R1Y2VyIn0.hqHT7uxrLb3kQ1uoXw_WQ6IYLSVIZRxv8UI67kFBqgo" -- "v4l2src device=/dev/video0 do-timestamp=true ! image/jpeg,framerate=30/1 ! jpegdec ! videoconvert ! video/x-raw,framerate=30/1 ! x264enc tune=zerolatency speed-preset=ultrafast bframes=0 key-int-max=30" "alsasrc device=hw:0 ! audioconvert ! audioresample ! opusenc bitrate=64000"'
+
+    networks:
+      - livekit-net
+    depends_on:
+      - livekit
+
+networks:
+  livekit-net:
+    driver: bridge

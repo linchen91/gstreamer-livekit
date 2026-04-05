@@ -1,5 +1,15 @@
 {
+  "name": "gstreamer-livekit",
+  "version": "1.0.0",
+  "description": "GStreamer LiveKit Streaming",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests specified\""
+  },
   "dependencies": {
-    "livekit-client": "^2.18.0"
+    "livekit-client": "^2.18.0",
+    "livekit-server-sdk": "^2.15.0"
   }
 }
